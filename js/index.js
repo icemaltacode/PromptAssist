@@ -8,16 +8,7 @@ const ENV = 'prod';
 
 window.addEventListener('load', () => {
     handleTheme();
-
-    const token = localStorage.getItem('jwt');
-    const created = localStorage.getItem('jwt_created');
-
-    if (!token || !created || Date.now() - parseInt(created) > 3600000) {
-        // No token or token older than 1 hour
-        loadView('login', bindLogin);
-    } else {
-        loadView('a3', bindAssistantSelection);
-    }
+    loadView('a3', bindAssistantSelection);
 });
 
 // window.addEventListener('resize', function () {
@@ -79,49 +70,6 @@ function loadView(view, cb) {
             cb();
         })
         .catch((error) => console.error('Error fetching the HTML:', error));
-}
-
-function bindLogin() {
-    const form = document.getElementById('signin-form');
-    if (!form) return;
-
-    form.addEventListener('submit', async function (event) {
-        event.preventDefault();
-
-        const username = document.getElementById('inputUsername').value.trim();
-        const password = document.getElementById('inputPassword').value.trim();
-
-        if (!username || !password) {
-            alert('Please enter both username and password.');
-            return;
-        }
-
-        try {
-            const url =
-                ENV === 'prod'
-                    ? 'https://terry.icelabs.training/backend/login'
-                    : 'http://127.0.0.1:3000/login';
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username, password })
-            });
-
-            if (!response.ok) {
-                throw new Error('Login failed');
-            }
-
-            const data = await response.json();
-            localStorage.setItem('jwt', data.token);
-            localStorage.setItem('jwt_created', Date.now());
-            loadView('a3', bindAssistantSelection);
-        } catch (error) {
-            console.error('Login error:', error);
-            document.getElementById('login-failed').classList.remove('d-none');
-        }
-    });
 }
 
 function bindAssistantSelection() {
@@ -233,161 +181,6 @@ function bindForm() {
                     );
                 });
         });
-
-    // Send messages to terry
-    sendButton = document.getElementById('sendMessage');
-    inputField = document.getElementById('terryInput');
-    outputDiv = document.getElementById('terryOutput');
-
-    // Attach event listener to the Send button
-    sendButton.addEventListener('click', sendMessage);
-
-    // Allow sending messages with Enter key
-    inputField.addEventListener('keypress', function (event) {
-        if (event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault();
-            sendMessage();
-        }
-    });
-
-    // Automatically send messages on form field input
-    document
-        .querySelectorAll('#promptForm input, textarea')
-        .forEach((element) => {
-            element.addEventListener('blur', function (event) {
-                content = this.value.trim();
-                if (content !== '') {
-                    id = this.id;
-                    message = `Evaluate whether ${content} is a good value for the ${id} placeholder.`;
-                    sendMessage(message);
-                }
-            });
-        });
-
-    // Evaluate whole prompt
-    evaluatePrompt.addEventListener('click', evaluateWholePrompt);
-
-    // Hide notification dot when sidebar opened
-    const sidebarToggle = document.querySelector('.floating-toggle-btn');
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', () => {
-            const dot = document.getElementById('notificationDot');
-            dot.classList.add('d-none');
-            dot.classList.remove('pulse-dot');
-        });
-    }
-}
-
-async function sendMessage(message) {
-    // Get message from input field or parameter
-    const userMessage = message || inputField.value.trim();
-    if (!userMessage) return; // Prevent sending empty messages
-
-    // Disable input and button while waiting for response
-    document.getElementById('sendMessage').disabled = true;
-    document.getElementById('terryInput').disabled = true;
-
-    // Show the user's own message if typed
-    if (!message) {
-        outputDiv.innerHTML += `<div class="text-primary user-bubble"><strong>You:</strong> ${userMessage}</div><br>`;
-    }
-    inputField.value = '';
-
-    // Show loading spinner
-    outputDiv.innerHTML += "<div class=\"spinner-grow spinner-grow-sm loading-img\" role=\"status\"></div>";
-
-    // Send request to backend proxy
-    try {
-        const url =
-            ENV === 'prod'
-                ? 'https://terry.icelabs.training/backend/chat'
-                : 'http://127.0.0.1:3000/chat';
-
-        const token = localStorage.getItem('jwt');
-
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                userMessage: userMessage,
-                threadId: conversation_thread
-            })
-        });
-
-        if (!response.ok) throw new Error('Network response was not ok');
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-
-        let receivedText = '';
-        outputDiv.innerHTML += `<div class="text-body terry-bubble"><strong>Terry:</strong></div>`;
-        let assistantOutputDiv = document.createElement('div');
-        assistantOutputDiv.classList.add(
-            'terry-bubble',
-            'text-secondary',
-            'terry-words'
-        );
-        outputDiv.appendChild(assistantOutputDiv);
-
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            const chunk = decoder.decode(value, { stream: true }).trim();
-
-            // Split in case multiple JSON objects arrive in a single chunk
-            const lines = chunk.split('\n');
-            for (let line of lines) {
-                line = line.trim();
-                if (line.startsWith('data:')) {
-                    const jsonString = line.replace(/^data:\s*/, '');
-                    try {
-                        const parsedData = JSON.parse(jsonString);
-                        if (parsedData.text && parsedData.text.trim() !== '') {
-                            receivedText += parsedData.text;
-                            assistantOutputDiv.innerHTML = `<p>${marked.parse(
-                                receivedText
-                            )}</p>`;
-                            outputDiv.scrollTop = outputDiv.scrollHeight; // Scroll to bottom
-                        }
-                        if (parsedData.threadId) {
-                            conversation_thread = parsedData.threadId; // Store threadId for follow-up messages
-                        }
-                    } catch (error) {
-                        console.error(
-                            'Error parsing JSON:',
-                            error,
-                            'Chunk:',
-                            jsonString
-                        );
-                    }
-                }
-            }
-
-            // Show the notification dot when the sidebar is collapsed.
-            const sidebar = document.getElementById('sidebar');
-            const isCollapsed = !sidebar.classList.contains('show');
-            if (isCollapsed) {
-                const dot = document.getElementById('notificationDot');
-                dot.classList.remove('d-none');
-                dot.classList.add('pulse-dot');
-            }
-        }
-    } catch (error) {
-        console.error('Error in streaming:', error);
-        document.getElementById('terryOutput').innerHTML +=
-            '<p><em>Error retrieving response.</em></p>';
-    } finally {
-        // Re-enable input and button after response
-        document.getElementById('sendMessage').disabled = false;
-        document.getElementById('terryInput').disabled = false;
-
-        // Hide loading spinner
-        document.querySelector('.loading-img').remove();
-    }
 }
 
 async function generatePrompt(display = true) {
@@ -427,9 +220,4 @@ async function generatePrompt(display = true) {
     } catch (error) {
         console.error('Error loading JSON:', error);
     }
-}
-
-async function evaluateWholePrompt() {
-    prompt = await generatePrompt(false);
-    sendMessage(`This is the prompt so far. Please evaluate it: ${prompt}`);
 }
