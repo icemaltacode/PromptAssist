@@ -16,7 +16,7 @@
                 <div class="mb-3">
                     <label for="placeholder-job-description" class="form-label">Job description*</label>
                     <input type="text" class="form-control" id="placeholder-job-description"
-                        placeholder="e.g. you are a strategic advisor" required>
+                        placeholder="e.g. you are a Recruitment Executive" required>
                     <div class="invalid-tooltip">
                         Job description is required.
                     </div>
@@ -30,12 +30,12 @@
                 </div>
                 <div class="mb-3">
                     <label for="placeholder-expertise" class="form-label">Expertise</label>
-                    <input type="text" class="form-control" id="placeholder-expertise" placeholder="e.g. Data analysis, copy generation, recruitment.">
+                    <input type="text" class="form-control" id="placeholder-expertise" placeholder="e.g. Recruitment, interviews, talent sourcing, communication.">
                 </div>
                 <div class="mb-3">
                     <label for="placeholder-task" class="form-label">Task</label>
                     <textarea class="form-control" id="placeholder-task" rows="5"
-                        placeholder="e.g. you will help me generate a marketing plan for a new product I am launching." required></textarea>
+                        placeholder="e.g. you will help me evaluate CVs I've received for a vacancy we have advertised." required></textarea>
                     <div class="invalid-tooltip">
                         Task is required.
                     </div>
@@ -56,15 +56,9 @@
                 <div class="mb-3">
                     <label for="placeholder-task-detail" class="form-label">Detailed Task Description</label>
                     <textarea class="form-control" id="placeholder-task-detail" rows="14"
-                        placeholder="e.g. I will be uploading three files, as follows: &#10; - sales.xlsx - sales for a financial quarter. &#10; - customers.xlsx - a list of customers who have purchsed in this quarter. &#10; - feedback.csv - feedback from customers regarding shopping experience. 
+                        placeholder="e.g. I will be uploading three files, as follows: &#10; - cv.docx - the CV(s) we have received. &#10; - vacancy.docx - the vacancy we advertised for. &#10; - department.docx - information about the department advertising the vacancy. 
 
-Your job is to analyse these three files and identify any trends relating to which products were pruchased, pricing from the sales file, and feedback given by clients.
-The format of the files is as follows:
-
-sales.xlsx: 
-- id: unique sale id
-- prodId: id of product sold
-- etc..." required></textarea>
+Your job is to analyse these three files and identify any which of the CVs shows the candidate most suitable for the vacancy we have advertised." required></textarea>
                 <div class="invalid-tooltip">
                     Detailed task description is required.
                 </div>
@@ -72,7 +66,7 @@ sales.xlsx:
                 <div class="mb-3">
                     <label for="placeholder-output-detail" class="form-label">Task Output Format</label>
                     <textarea class="form-control" id="placeholder-output-detail" rows="5"
-                        placeholder="e.g. &#10;- Start with an overall 100-word summary of your findings.&#10;- Show me a pie chart of sales by product.&#10;- recommend hash tags for use on our social media." required></textarea>
+                        placeholder="e.g. &#10;- Show me the candidates, in order with a number.&#10;- Justify why this candidate is in this position.&#10;- Show me any notes or points about this candidate." required></textarea>
                     <div class="invalid-tooltip">
                         Task output format is required.
                     </div>
@@ -80,12 +74,12 @@ sales.xlsx:
                 <div class="mb-3">
                     <label for="placeholder-boundaries" class="form-label">Boundaries</label>
                     <textarea class="form-control" id="placeholder-boundaries" rows="5"
-                        placeholder="e.g. &#10;- Do not mention our competitors.&#10; - Refuse to answer questions not related to your primary task.&#10; - Never make up information. Do not hallucinate."></textarea>
+                        placeholder="e.g. &#10;- Ignore the candidates' age, gender and ethnicity.&#10; - Do not eliminate candidates outright.&#10; - Never make up information. Do not hallucinate."></textarea>
                 </div>
                 <div class="mb-3">
                     <label for="placeholder-references" class="form-label">References</label>
                     <textarea class="form-control" id="placeholder-references" rows="5"
-                        placeholder="e.g. &#10;- If you don't know the answer to a question, direct the user to email info@mycompanyname.com.&#10; - When using external (web) sources, always show your source."></textarea>
+                        placeholder="e.g. &#10;- If you are unsure about the candidate order, please let the user know.&#10; - When using external (web) sources, always show your source."></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary">Generate</button>
         </div>
